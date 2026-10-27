@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GCP Spotlight Settings</title>
+    <link rel="stylesheet" href="./options.css" />
+  </head>
+  <body>
+    <main>
+      <h1>GCP Spotlight Settings</h1>
+
+      <section>
+        <h2>Projects</h2>
+        <p class="hint">Pick a project in the search box by typing <code>@alias</code> or pressing Tab. Without an alias, the project ID is used.
+          A header color tints the top of the console for that project; leave it empty to keep the console default.
+          Drag <span class="drag-handle-inline">⠿</span> to reorder; the project list in the search box follows this order.</p>
+        <table id="project-table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Alias</th>
+              <th>Project ID</th>
+              <th>Header color</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="project-rows"></tbody>
+          <tfoot>
+            <tr class="add-row">
+              <td></td>
+              <td><input id="new-alias" placeholder="e.g. prod" /></td>
+              <td><input id="new-id" placeholder="e.g. my-project-123" /></td>
+              <td id="new-color-cell"></td>
+              <td><button type="button" id="add">Add</button></td>
+            </tr>
+          </tfoot>
+        </table>
+        <p id="error" class="error" role="alert"></p>
+      </section>
+
+      <section>
+        <h2>Service list</h2>
+        <p class="hint">
+          Fetched from the console's <a href="https://console.cloud.google.com/products" target="_blank" rel="noreferrer">All products</a> page.
+          Click <b>Refresh</b> under the search box or <b>Fetch now</b> here to reload it. The search box searches this list.
+        </p>
+        <p class="sync-row"><span id="sync-status">-</span> <button type="button" id="sync-now">Fetch now</button></p>
+        <div class="list-tools">
+          <input id="entry-filter" type="search" placeholder="Filter list" />
+          <label class="check"><input id="hidden-only" type="checkbox" /> Hidden only</label>
+        </div>
+        <p class="hint">Uncheck an item to hide it from search. Hidden items stay hidden after a refresh.</p>
+        <ul id="entry-list" class="entry-list"></ul>
+        <p id="entry-count" class="hint"></p>
+
+        <h3>Custom pages</h3>
+        <p class="hint">Add pages that are not in the list. Paste a path or a console URL; <code>?project=</code> is added automatically.</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Path</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="custom-rows"></tbody>
+          <tfoot>
+            <tr class="add-row">
+              <td><input id="new-custom-title" placeholder="e.g. Ops dashboard" /></td>
+              <td><input id="new-custom-path" placeholder="e.g. /monitoring/dashboards/builder/abc" /></td>
+              <td><button type="button" id="add-custom">Add</button></td>
+            </tr>
+          </tfoot>
+        </table>
+        <p id="custom-error" class="error" role="alert"></p>
+      </section>
+
+      <section>
+        <h2>Shortcut</h2>
+        <p>Open search box: <kbd id="shortcut">-</kbd> <button type="button" id="change-shortcut">Change</button></p>
+        <p>
+          Open frequently used services:
+          <select id="favorite-modifier">
+            <option value="ctrl">Ctrl</option>
+            <option value="alt">Alt / Option</option>
+            <option value="none">Off</option>
+          </select>
+          <span id="favorite-modifier-hint" class="hint"></span>
+        </p>
+      </section>
+    </main>
+    <div id="toast" role="status">Saved</div>
+    <script type="module" src="./options.ts"></script>
+  </body>
+</html>

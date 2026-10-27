@@ -1,0 +1,280 @@
+.gs-root {
+  --gs-bg: #ffffff;
+  --gs-fg: #1f1f1f;
+  --gs-muted: #6b6f76;
+  --gs-border: #e3e5e8;
+  --gs-selected: #e8f0fe;
+  --gs-accent: #1a73e8;
+  --gs-chip-bg: #e8f0fe;
+  --gs-chip-fg: #1967d2;
+  --gs-backdrop: rgba(32, 33, 36, 0.28);
+  --gs-shadow: 0 24px 60px rgba(0, 0, 0, 0.25), 0 2px 8px rgba(0, 0, 0, 0.12);
+
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 16vh;
+  background: var(--gs-backdrop);
+  font: 14px/1.4 -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Segoe UI', system-ui, sans-serif;
+  color: var(--gs-fg);
+  box-sizing: border-box;
+}
+
+@media (prefers-color-scheme: dark) {
+  .gs-root {
+    --gs-bg: #2a2b2e;
+    --gs-fg: #e8eaed;
+    --gs-muted: #9aa0a6;
+    --gs-border: #3c3d41;
+    --gs-selected: #394457;
+    --gs-accent: #8ab4f8;
+    --gs-chip-bg: #394457;
+    --gs-chip-fg: #a8c7fa;
+    --gs-backdrop: rgba(0, 0, 0, 0.45);
+  }
+}
+
+.gs-root *,
+.gs-root *::before,
+.gs-root *::after {
+  box-sizing: border-box;
+}
+
+.gs-panel {
+  width: min(640px, calc(100vw - 32px));
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--gs-bg);
+  border: 1px solid var(--gs-border);
+  border-radius: 14px;
+  box-shadow: var(--gs-shadow);
+  overflow: hidden;
+}
+
+/* 대체 창: 창 전체를 패널로 쓴다 */
+.gs-window {
+  padding: 0;
+  background: var(--gs-bg);
+}
+
+.gs-window .gs-panel {
+  width: 100%;
+  height: 100vh;
+  max-height: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.gs-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--gs-border);
+}
+
+.gs-favs {
+  flex: none;
+  display: flex;
+  gap: 6px;
+  padding: 8px 16px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--gs-border);
+}
+
+.gs-favs[hidden] {
+  display: none;
+}
+
+.gs-fav {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 3px 10px 3px 4px;
+  border: 1px solid var(--gs-border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--gs-fg);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.gs-fav:hover {
+  border-color: var(--gs-accent);
+  color: var(--gs-accent);
+}
+
+.gs-fav-key {
+  flex: none;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 5px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  background: var(--gs-chip-bg);
+  color: var(--gs-chip-fg);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 16px;
+  text-align: center;
+}
+
+.gs-chip {
+  flex: none;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 4px 10px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: var(--gs-chip-bg);
+  color: var(--gs-chip-fg);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.gs-chip-empty {
+  background: transparent;
+  border-color: var(--gs-border);
+  color: var(--gs-muted);
+  font-weight: 500;
+}
+
+.gs-chip-active {
+  border-color: var(--gs-accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--gs-accent) 30%, transparent);
+}
+
+.gs-input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--gs-fg);
+  font: inherit;
+  font-size: 18px;
+}
+
+.gs-input::placeholder {
+  color: var(--gs-muted);
+}
+
+.gs-list {
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.gs-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.gs-selected {
+  background: var(--gs-selected);
+}
+
+.gs-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gs-parent {
+  color: var(--gs-muted);
+}
+
+.gs-sub {
+  flex: none;
+  max-width: 45%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--gs-muted);
+  font-size: 12px;
+}
+
+.gs-empty {
+  padding: 16px 12px;
+  color: var(--gs-muted);
+}
+
+.gs-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  white-space: nowrap;
+  padding: 8px 16px;
+  border-top: 1px solid var(--gs-border);
+  color: var(--gs-muted);
+  font-size: 12px;
+}
+
+.gs-footer kbd {
+  font: inherit;
+  padding: 0 4px;
+  border: 1px solid var(--gs-border);
+  border-radius: 4px;
+}
+
+.gs-clear {
+  margin-left: auto;
+}
+
+.gs-clear,
+.gs-refresh,
+.gs-settings {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--gs-accent);
+  font: inherit;
+  cursor: pointer;
+}
+
+.gs-clear {
+  color: var(--gs-muted);
+}
+
+.gs-clear.gs-confirm {
+  color: var(--gs-danger, #d93025);
+  font-weight: 600;
+}
+
+.gs-refresh,
+.gs-settings {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--gs-accent);
+  font: inherit;
+  cursor: pointer;
+}
+
+.gs-refresh:disabled {
+  color: var(--gs-muted);
+  cursor: default;
+}

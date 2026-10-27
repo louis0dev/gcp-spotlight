@@ -1,0 +1,381 @@
+:root {
+  --bg: #f8f9fa;
+  --card: #ffffff;
+  --fg: #1f1f1f;
+  --muted: #6b6f76;
+  --border: #dadce0;
+  --accent: #1a73e8;
+  --danger: #d93025;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #202124;
+    --card: #2a2b2e;
+    --fg: #e8eaed;
+    --muted: #9aa0a6;
+    --border: #3c3d41;
+    --accent: #8ab4f8;
+    --danger: #f28b82;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 14px/1.5 -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Segoe UI', system-ui, sans-serif;
+}
+
+main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 16px 64px;
+}
+
+h1 {
+  font-size: 22px;
+  margin: 0 0 24px;
+}
+
+section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+h2 {
+  font-size: 16px;
+  margin: 0 0 8px;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--muted);
+  font-size: 12px;
+  padding: 4px;
+}
+
+td {
+  padding: 4px;
+}
+
+th:nth-child(1) {
+  width: 30%;
+}
+
+th:nth-child(3) {
+  width: 72px;
+}
+
+/* 프로젝트 표: 끌기 손잡이 | 별칭 | 프로젝트 ID | 헤더 색 | 삭제. 남는 폭은 프로젝트 ID가 갖는다. */
+#project-table {
+  table-layout: fixed;
+}
+
+#project-table th:nth-child(1) {
+  width: 20px;
+}
+
+#project-table th:nth-child(2) {
+  width: 28%;
+}
+
+#project-table th:nth-child(3) {
+  width: auto;
+}
+
+#project-table th:nth-child(4) {
+  width: 64px;
+}
+
+#project-table th:nth-child(5) {
+  width: 72px;
+}
+
+.drag-handle {
+  display: block;
+  padding: 4px 0;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1;
+  text-align: center;
+  cursor: grab;
+  user-select: none;
+}
+
+.drag-handle-inline {
+  color: var(--muted);
+}
+
+#project-rows tr.dragging {
+  opacity: 0.4;
+}
+
+/* 놓을 위치 표시선 */
+#project-rows tr.drop-before td {
+  box-shadow: inset 0 2px 0 var(--accent);
+}
+
+#project-rows tr.drop-after td {
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+#project-rows td:nth-child(3),
+#new-color-cell {
+  width: 60px;
+}
+
+.color-field {
+  position: relative;
+}
+
+.swatch {
+  width: 36px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+/* 색을 안 고른 상태: 빗금으로 "기본색"임을 보여준다 */
+.color-field.unset .swatch {
+  background: repeating-linear-gradient(45deg, var(--border) 0 4px, transparent 4px 8px);
+}
+
+.color-popover {
+  position: absolute;
+  z-index: 10;
+  top: 36px;
+  left: 0;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+.color-popover[hidden] {
+  display: none;
+}
+
+.preset-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 24px);
+  gap: 6px;
+}
+
+.preset {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 50%;
+}
+
+.preset:hover {
+  transform: scale(1.12);
+}
+
+.preset.selected {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.popover-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  gap: 8px;
+}
+
+.custom {
+  position: relative;
+  color: var(--accent);
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* 네이티브 컬러 피커는 글자 위에 투명하게 겹쳐 둔다 */
+.custom input[type='color'] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.color-reset {
+  padding: 4px 8px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.color-reset:disabled {
+  color: var(--muted);
+  cursor: default;
+}
+
+input:not([type='checkbox']) {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
+button {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  cursor: pointer;
+}
+
+button.delete {
+  color: var(--danger);
+}
+
+.add-row td {
+  padding-top: 12px;
+}
+
+.error {
+  color: var(--danger);
+  min-height: 1.5em;
+  margin: 8px 0 0;
+}
+
+h3 {
+  font-size: 14px;
+  margin: 24px 0 4px;
+}
+
+.sync-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.list-tools {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.list-tools input[type='search'] {
+  flex: 1;
+}
+
+.check {
+  white-space: nowrap;
+}
+
+.entry-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 360px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.entry-list li {
+  border-bottom: 1px solid var(--border);
+}
+
+.entry-list li:last-child {
+  border-bottom: 0;
+}
+
+.entry-list label {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.entry-list .parent {
+  color: var(--muted);
+}
+
+.entry-list .path {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 45%;
+}
+
+.entry-list li.off .title {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+kbd {
+  padding: 2px 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font: inherit;
+}
+
+#toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: var(--fg);
+  color: var(--bg);
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+
+#toast.show {
+  opacity: 1;
+}
+
+select {
+  margin: 0 6px;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}

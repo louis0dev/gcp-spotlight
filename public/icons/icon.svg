@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- 구름 + >_ 커서 (32px 이상용). 16px용은 icon-small.svg -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4f8ff7"/>
+      <stop offset="1" stop-color="#1a56c8"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="120" height="120" rx="28" fill="url(#bg)"/>
+  <path d="M36 94h56a22 22 0 0 0 3-43.8a30 30 0 0 0-57.5 9.5A17 17 0 0 0 36 94z" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M46 58l14 12-14 12" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="67" y1="82" x2="86" y2="82" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+</svg>
