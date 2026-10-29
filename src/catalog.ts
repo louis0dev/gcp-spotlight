@@ -17,6 +17,7 @@ interface ServiceDef {
 
 export interface Entry {
   id: string;
+  projectId?: string;
   kind: 'service' | 'page';
   title: string;
   /** 세부 페이지일 때 소속 서비스 이름 */
@@ -221,10 +222,28 @@ export const ENTRIES: Entry[] = SERVICES.flatMap((s) => {
 
 export function buildConsoleUrl(path: string, projectId?: string, authuser = '0'): string {
   const url = new URL(path, CONSOLE_ORIGIN);
+  // 제품별 웹 UI의 쿼리는 콘솔의 project/authuser와 의미가 다를 수 있다.
+  if (url.origin !== CONSOLE_ORIGIN) return url.toString();
   if (projectId) url.searchParams.set('project', projectId);
   // 여러 Google 계정을 쓸 때 지금 보고 있는 계정으로 연다.
   if (authuser !== '0') url.searchParams.set('authuser', authuser);
   return url.toString();
+}
+
+/** 콘솔 경로는 프로젝트를 열 때 붙이고, 외부 제품 UI 주소는 그대로 보관한다. */
+export function normalizeCustomPath(input: string): string | undefined {
+  const value = input.trim();
+  if (!value || (!value.startsWith('/') && !/^https?:\/\//i.test(value))) return undefined;
+  try {
+    const url = new URL(value, CONSOLE_ORIGIN);
+    if (!['https:', 'http:'].includes(url.protocol) || url.username || url.password) return undefined;
+    if (url.origin !== CONSOLE_ORIGIN) return url.toString();
+    url.searchParams.delete('project');
+    url.searchParams.delete('authuser');
+    return url.pathname + url.search + url.hash;
+  } catch {
+    return undefined;
+  }
 }
 
 function consoleParam(href: string | undefined, name: string): string | undefined {

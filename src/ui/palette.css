@@ -137,7 +137,7 @@
   white-space: nowrap;
   padding: 4px 10px;
   border: 1px solid transparent;
-  border-radius: 999px;
+  border-radius: 6px;
   background: var(--gs-chip-bg);
   color: var(--gs-chip-fg);
   font: inherit;
@@ -194,6 +194,38 @@
 
 .gs-selected {
   background: var(--gs-selected);
+}
+
+.gs-item-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.gs-project-color {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+}
+
+.gs-custom-badge {
+  flex: none;
+  padding: 1px 5px;
+  border: 1px solid var(--gs-border);
+  border-radius: 4px;
+  color: var(--gs-muted);
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.gs-custom-badge-colored {
+  border-color: color-mix(in srgb, var(--gs-custom-color) 45%, var(--gs-border));
+  background: color-mix(in srgb, var(--gs-custom-color) 12%, var(--gs-bg));
+  color: color-mix(in srgb, var(--gs-custom-color) 35%, var(--gs-fg));
 }
 
 .gs-title {

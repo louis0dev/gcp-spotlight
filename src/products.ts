@@ -118,7 +118,7 @@ function productEntries(items: ProductItem[]): Entry[] {
 
 function customEntry(c: CustomEntry): Entry {
   // c.id는 CUSTOM_ID_PREFIX로 시작한다.
-  return { id: c.id, kind: 'service', title: c.title, path: c.path, ownFields: [c.title, c.path], parentFields: [] };
+  return { id: c.id, projectId: c.projectId, kind: 'service', title: c.title, path: c.path, ownFields: [c.title, c.path], parentFields: [] };
 }
 
 export interface EntrySource {

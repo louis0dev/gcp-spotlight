@@ -54,17 +54,23 @@ function byUsage(usage: Usage, a: string, b: string): number {
 // 이 점수 이상(정확히 일치, 앞부분 일치, 단어 시작 일치)이면 잘 맞은 결과로 보고 사용 횟수를 우선한다.
 const STRONG_MATCH = 60;
 
-export function searchEntries(query: string, entries: Entry[], usage: Usage): Entry[] {
+export function entriesForProject(entries: Entry[], projectId?: string): Entry[] {
+  return entries.filter((entry) => !entry.projectId || entry.projectId === projectId);
+}
+
+export function searchEntries(query: string, entries: Entry[], usage: Usage, projectId?: string): Entry[] {
+  entries = entriesForProject(entries, projectId);
   if (!query.trim()) {
     // 빈 입력: 한 번이라도 연 항목만, 많이 쓴 순서로
     return entries.filter((e) => usage[e.id]).sort((a, b) => byUsage(usage, a.id, b.id));
   }
-  // 잘 맞은 결과 안에서는 많이 쓴 순서, 그다음 점수 순서. 약하게 맞은 결과(단어 중간, 머리글자)는 그 뒤.
+  // 검색어에 맞는 직접 등록 항목을 먼저 표시한다. 각 그룹 안에서는 기존 점수/사용 빈도 순서를 유지한다.
   return entries
     .map((entry, i) => ({ entry, i, score: scoreEntry(query, entry) }))
     .filter((r) => r.score > 0)
     .sort(
       (a, b) =>
+        Number(b.entry.id.startsWith('custom:')) - Number(a.entry.id.startsWith('custom:')) ||
         Number(b.score >= STRONG_MATCH) - Number(a.score >= STRONG_MATCH) ||
         byUsage(usage, a.entry.id, b.entry.id) ||
         b.score - a.score ||

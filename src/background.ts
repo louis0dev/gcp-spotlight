@@ -1,7 +1,8 @@
 import { authuserFromUrl, projectFromUrl } from './catalog';
 import type { Message, SyncResult } from './messages';
 import { NotSignedInError, syncProducts } from './products';
-import { getProductSnapshot } from './storage';
+import { getCustomEntries, getProductSnapshot } from './storage';
+import { customHeaderOrigins } from './custom-headers';
 
 const PALETTE_WIDTH = 680;
 const PALETTE_HEIGHT = 460;
@@ -119,3 +120,36 @@ async function navigate(url: string, newTab: boolean, tabId?: number): Promise<v
   }
   await chrome.windows.update(tab.windowId, { focused: true });
 }
+
+
+// Optional access is granted when adding a custom page, only for that site.
+const CUSTOM_HEADER_SCRIPT = 'custom-page-header';
+async function syncCustomHeaderScripts(): Promise<void> {
+  const origins = customHeaderOrigins(await getCustomEntries());
+  const granted = await Promise.all(origins.map(async (origin) =>
+    await chrome.permissions.contains({ origins: [origin] }) ? origin : undefined,
+  ));
+  const matches = granted.filter((origin): origin is string => !!origin);
+  const registered = await chrome.scripting.getRegisteredContentScripts({ ids: [CUSTOM_HEADER_SCRIPT] });
+  if (!matches.length) {
+    if (registered.length) await chrome.scripting.unregisterContentScripts({ ids: [CUSTOM_HEADER_SCRIPT] });
+    return;
+  }
+  const script: chrome.scripting.RegisteredContentScript = {
+    id: CUSTOM_HEADER_SCRIPT, matches, js: ['header.js'], runAt: 'document_start',
+  };
+  if (registered.length) await chrome.scripting.updateContentScripts([script]);
+  else await chrome.scripting.registerContentScripts([script]);
+}
+
+let headerSync = Promise.resolve();
+function queueHeaderSync(): void {
+  headerSync = headerSync.then(syncCustomHeaderScripts).catch((error) => console.warn('Custom page colors:', error));
+}
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === 'sync' && changes.customEntries) queueHeaderSync();
+});
+chrome.permissions.onAdded.addListener(queueHeaderSync);
+chrome.permissions.onRemoved.addListener(queueHeaderSync);
+chrome.runtime.onInstalled.addListener(queueHeaderSync);
+queueHeaderSync();

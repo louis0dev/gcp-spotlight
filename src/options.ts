@@ -1,4 +1,5 @@
-import { CONSOLE_ORIGIN, type Entry } from './catalog';
+import { customHeaderOrigins } from './custom-headers';
+import { normalizeCustomPath, type Entry } from './catalog';
 import { syncProductsNow } from './messages';
 import { CUSTOM_ID_PREFIX, loadEntrySource } from './products';
 import {
@@ -56,6 +57,7 @@ async function save(next: Project[]): Promise<boolean> {
   if (error) return false;
   projects = next;
   await setProjects(projects);
+  renderCustom();
   showSaved();
   return true;
 }
@@ -185,6 +187,11 @@ function render(): void {
           idInput.value = p.id;
           color.set(p.color);
         } else {
+          if (p.id !== next[index].id) {
+            custom = custom.map((entry) => entry.projectId === p.id ? { ...entry, projectId: next[index].id } : entry);
+            await setCustomEntries(custom);
+            renderCustom();
+          }
           p = next[index];
         }
       };
@@ -396,32 +403,49 @@ hiddenOnly.addEventListener('change', renderEntries);
 // ---- 직접 등록 ----
 
 const customRows = document.getElementById('custom-rows') as HTMLTableSectionElement;
+const newCustomProject = document.getElementById('new-custom-project') as HTMLSelectElement;
 const newCustomTitle = document.getElementById('new-custom-title') as HTMLInputElement;
 const newCustomPath = document.getElementById('new-custom-path') as HTMLInputElement;
 const customError = document.getElementById('custom-error') as HTMLParagraphElement;
 
 let custom: CustomEntry[] = [];
 
-/** 콘솔 주소나 경로를 "/경로?쿼리" 형태로 바꾼다. project, authuser는 열 때 붙이므로 뺀다. */
-function normalizePath(input: string): string | undefined {
-  const value = input.trim();
-  if (!value) return undefined;
-  let url: URL;
-  try {
-    url = new URL(value, CONSOLE_ORIGIN);
-  } catch {
-    return undefined;
+function projectOptions(selected = '', legacy = false): HTMLOptionElement[] {
+  const options = [new Option(legacy ? 'All projects (legacy)' : 'Choose project', '')];
+  for (const project of projects) {
+    options.push(new Option(project.alias ? `${project.alias} (${project.id})` : project.id, project.id));
   }
-  if (url.origin !== CONSOLE_ORIGIN) return undefined;
-  url.searchParams.delete('project');
-  url.searchParams.delete('authuser');
-  return url.pathname + url.search + url.hash;
+  if (selected && !projects.some((project) => project.id === selected)) {
+    options.push(new Option(`${selected} (removed)`, selected));
+  }
+  for (const option of options) option.selected = option.value === selected;
+  options[0].disabled = true;
+  return options;
 }
 
 function renderCustom(): void {
+  const selected = projects.some((project) => project.id === newCustomProject.value) ? newCustomProject.value : '';
+  newCustomProject.replaceChildren(...projectOptions(selected));
   customRows.replaceChildren(
     ...custom.map((c) => {
       const tr = document.createElement('tr');
+      const project = document.createElement('select');
+      project.setAttribute('aria-label', `Project for ${c.title}`);
+      project.replaceChildren(...projectOptions(c.projectId, !c.projectId));
+      project.addEventListener('change', async () => {
+        if (custom.some((entry) => entry.id !== c.id && entry.projectId === project.value && entry.path === c.path)) {
+          customError.textContent = `Path already registered for this project: ${c.path}`;
+          project.value = c.projectId ?? '';
+          return;
+        }
+        customError.textContent = '';
+        custom = custom.map((entry) => entry.id === c.id ? { ...entry, projectId: project.value } : entry);
+        await setCustomEntries(custom);
+        renderCustom();
+        showSaved();
+      });
+      const projectCell = document.createElement('td');
+      projectCell.append(project);
       const title = Object.assign(document.createElement('td'), { textContent: c.title });
       const path = Object.assign(document.createElement('td'), { textContent: c.path });
       const del = Object.assign(document.createElement('button'), { type: 'button', textContent: 'Delete', className: 'delete' });
@@ -433,27 +457,51 @@ function renderCustom(): void {
       });
       const delCell = document.createElement('td');
       delCell.append(del);
-      tr.append(title, path, delCell);
+      tr.append(projectCell, title, path, delCell);
       return tr;
     }),
   );
 }
 
+let addingCustom = false;
+
 async function addCustom(): Promise<void> {
+  if (addingCustom) return;
   const title = newCustomTitle.value.trim();
-  const path = normalizePath(newCustomPath.value);
-  if (!title) customError.textContent = 'Enter a name.';
-  else if (!path) customError.textContent = 'Enter a console path (starting with /) or a console.cloud.google.com URL.';
-  else if (custom.some((c) => c.path === path)) customError.textContent = `Path already registered: ${path}`;
+  const path = normalizeCustomPath(newCustomPath.value);
+  const projectId = newCustomProject.value;
+  if (!projects.some((project) => project.id === projectId)) customError.textContent = 'Choose a registered project. Add one in Projects above if needed.';
+  else if (!title) customError.textContent = 'Enter a name.';
+  else if (!path) customError.textContent = 'Enter a console path (starting with /) or a full HTTP/HTTPS URL.';
+  else if (custom.some((c) => c.projectId === projectId && c.path === path)) customError.textContent = `Path already registered for this project: ${path}`;
   else {
     customError.textContent = '';
-    custom = [...custom, { id: `${CUSTOM_ID_PREFIX}${Date.now()}`, title, path }];
-    await setCustomEntries(custom);
-    newCustomTitle.value = '';
-    newCustomPath.value = '';
-    renderCustom();
-    showSaved();
-    newCustomTitle.focus();
+    const entry = { id: `${CUSTOM_ID_PREFIX}${crypto.randomUUID()}`, projectId, title, path };
+    const origins = customHeaderOrigins([entry]);
+    const button = document.getElementById('add-custom') as HTMLButtonElement;
+    addingCustom = true;
+    button.disabled = true;
+    try {
+      // Call before any other await to preserve the Add click/Enter user gesture.
+      // Chrome returns immediately without a prompt for already granted sites.
+      if (origins.length && !(await chrome.permissions.request({ origins }))) {
+        customError.textContent = 'Site access was not granted. Click Add again and allow access to register this page with project colors.';
+        return;
+      }
+      const next = [...custom, entry];
+      await setCustomEntries(next);
+      custom = next;
+      newCustomTitle.value = '';
+      newCustomPath.value = '';
+      renderCustom();
+      showSaved();
+      newCustomTitle.focus();
+    } catch {
+      customError.textContent = 'Could not add the page. Check site access and try Add again.';
+    } finally {
+      addingCustom = false;
+      button.disabled = false;
+    }
   }
 }
 

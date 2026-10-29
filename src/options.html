@@ -55,20 +55,23 @@
         <p id="entry-count" class="hint"></p>
 
         <h3>Custom pages</h3>
-        <p class="hint">Add pages that are not in the list. Paste a path or a console URL; <code>?project=</code> is added automatically.</p>
-        <table>
+        <p class="hint">Choose a project, then add a name and console path or full URL (Airflow, YARN, etc.). Pages appear only for that project. Console paths get <code>?project=</code> automatically; external URLs open as saved.</p>
+        <p class="hint">When adding an external URL, allow site access if prompted to show the project's Header color strip. Already allowed sites need no further approval. Reload open custom pages after adding.</p>
+        <table id="custom-table">
           <thead>
             <tr>
+              <th>Project</th>
               <th>Name</th>
-              <th>Path</th>
+              <th>Path / URL</th>
               <th></th>
             </tr>
           </thead>
           <tbody id="custom-rows"></tbody>
           <tfoot>
             <tr class="add-row">
+              <td><select id="new-custom-project" aria-label="Project for new custom page"></select></td>
               <td><input id="new-custom-title" placeholder="e.g. Ops dashboard" /></td>
-              <td><input id="new-custom-path" placeholder="e.g. /monitoring/dashboards/builder/abc" /></td>
+              <td><input id="new-custom-path" placeholder="/console/path or https://…" /></td>
               <td><button type="button" id="add-custom">Add</button></td>
             </tr>
           </tfoot>

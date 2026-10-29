@@ -1,8 +1,8 @@
 import { CONSOLE_ORIGIN, buildConsoleUrl, projectFromUrl, type Entry } from '../catalog';
 import { isDarkColor } from '../color';
 import { syncProductsNow } from '../messages';
-import { loadSearchData } from '../products';
-import { searchEntries, searchProjects } from '../search';
+import { CUSTOM_ID_PREFIX, loadSearchData } from '../products';
+import { entriesForProject, searchEntries, searchProjects } from '../search';
 import {
   clearUsage,
   getLastProject,
@@ -256,6 +256,7 @@ class Palette {
   }
 
   private refresh(): void {
+    this.renderFavorites();
     let selected = 0;
     if (this.mode === 'project') {
       this.items = this.projectItems(this.input.value);
@@ -281,7 +282,7 @@ class Palette {
 
   private serviceItems(): Item[] {
     // 빈 입력이면 최근 사용한 항목이 먼저 나온다 (searchEntries).
-    return searchEntries(this.serviceQuery(), this.entries, this.usage)
+    return searchEntries(this.serviceQuery(), this.entries, this.usage, this.projectId)
       .slice(0, MAX_ITEMS)
       .map((entry) => ({ kind: 'entry', entry }));
   }
@@ -291,9 +292,9 @@ class Palette {
     return searchProjects(query, this.projects).map((project) => ({ kind: 'project', project }));
   }
 
-  /** 프로젝트와 상관없이 많이 연 순서(같으면 최근 순). 숨긴 항목은 entries에 없으므로 빠진다. */
+  /** 현재 프로젝트에서 열 수 있는 항목 중 많이 연 순서(같으면 최근 순). */
   private favorites(): Entry[] {
-    return this.entries
+    return entriesForProject(this.entries, this.projectId)
       .filter((e) => this.usage[e.id])
       .sort((a, b) => this.usage[b.id].count - this.usage[a.id].count || this.usage[b.id].last - this.usage[a.id].last)
       .slice(0, MAX_FAVORITES);
@@ -473,11 +474,37 @@ class Palette {
         }
         title.append(item.entry.title);
         sub.textContent = item.entry.path;
+        sub.title = item.entry.path;
+        if (item.entry.id.startsWith(CUSTOM_ID_PREFIX)) {
+          const label = document.createElement('span');
+          label.className = 'gs-item-label';
+          const badge = document.createElement('span');
+          badge.className = 'gs-custom-badge';
+          badge.textContent = 'Custom';
+          const project = this.projects.find((p) => p.id === (item.entry.projectId ?? this.projectId));
+          if (project?.color) {
+            badge.style.setProperty('--gs-custom-color', project.color);
+            badge.classList.add('gs-custom-badge-colored');
+          }
+          label.append(badge, title);
+          return [label, sub];
+        }
         break;
       }
       case 'project': {
         const { project } = item;
         title.textContent = project.alias || project.id;
+        if (project.color) {
+          const dot = document.createElement('span');
+          dot.className = 'gs-project-color';
+          dot.style.backgroundColor = project.color;
+          dot.setAttribute('aria-hidden', 'true');
+          const label = document.createElement('span');
+          label.className = 'gs-item-label';
+          label.append(dot, title);
+          sub.textContent = project.id === this.projectId ? `${project.id} · current` : project.id;
+          return [label, sub];
+        }
         sub.textContent = project.id === this.projectId ? `${project.id} · current` : project.id;
         break;
       }

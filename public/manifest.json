@@ -1,9 +1,10 @@
 {
   "manifest_version": 3,
   "name": "GCP Spotlight",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Search Google Cloud console pages with a keyboard shortcut and jump straight to them.",
   "permissions": ["activeTab", "scripting", "storage"],
+  "optional_host_permissions": ["https://*/*", "http://*/*"],
   "host_permissions": ["https://console.cloud.google.com/*"],
   "content_scripts": [
     {

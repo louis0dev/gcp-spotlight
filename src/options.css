@@ -379,3 +379,23 @@ select {
   color: inherit;
   font: inherit;
 }
+
+#custom-table {
+  table-layout: fixed;
+}
+
+#custom-table th:nth-child(1) { width: 25%; }
+#custom-table th:nth-child(2) { width: 23%; }
+#custom-table th:nth-child(3) { width: auto; }
+#custom-table th:nth-child(4) { width: 64px; }
+
+#custom-table td {
+  overflow-wrap: anywhere;
+}
+
+#custom-table select {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 6px 4px;
+}

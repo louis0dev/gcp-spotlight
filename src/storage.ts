@@ -30,6 +30,8 @@ export interface ProductSnapshot {
 /** 설정에서 직접 등록한 항목 */
 export interface CustomEntry {
   id: string;
+  /** 실제 프로젝트 ID. 이전 버전에서 등록한 항목은 모든 프로젝트에서 표시한다. */
+  projectId?: string;
   title: string;
   path: string;
 }
